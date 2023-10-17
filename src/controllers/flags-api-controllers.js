@@ -1,6 +1,7 @@
 import EventEmitter from "events";
+import Clients from "../models/sse-clients";
 
-const eventEmitter = new EventEmitter();
+let clients = new Clients();
 
 export const getAllFlags = (req, res) => {
   let flags;
@@ -10,9 +11,8 @@ export const getAllFlags = (req, res) => {
     res.status(500).json({ error: "Internal error occured." });
   }
 
-  eventEmitter.emit("change", "all flags were fetched"); // tmp, prototyping line
-
   res.status(200).json([{ flag: "I am a flag" }]);
+  return clients.sendNotificationToAllClients("all flags were fetched"); // here updates msg is sent to all sse connected clients
 };
 
 export const getFlagById = (req, res) => {
@@ -97,11 +97,7 @@ export const updateFlag = (req, res) => {
   res.status(200).json({ flag: updatedFlag });
 };
 
-let clients = []; // where is best way to keep clients?
-
 export const sseNotifications = (req, res) => {
-  console.log("Establishing new sse connection.");
-
   const headers = {
     "Content-Type": "text/event-stream",
     Connection: "keep-alive",
@@ -109,30 +105,17 @@ export const sseNotifications = (req, res) => {
   };
   res.writeHead(200, headers);
 
-  // write now it sends full log, but if time allows this can be only the updated log record only
-  let data = `data: ${JSON.stringify({ msg: "sse established." })}\n\n`;
+  const clientId = clients.addNewClient(res);
 
-  // trying to catch event
-  eventEmitter.on("change", (msg) => {
-    // console.log(msg);
-    data = `data: ${JSON.stringify({ msg })}\n\n`;
-    res.write(data);
-  });
+  const connectMsg = `SSE connection established with client id: ${clientId}`;
+  console.log(connectMsg);
 
+  let data = `data: ${JSON.stringify({ msg: connectMsg })}\n\n`;
   res.write(data);
-
-  const clientId = Date.now();
-
-  const newClient = {
-    id: clientId,
-    res,
-  };
-
-  clients.push(newClient);
 
   req.on("close", () => {
     console.log(`${clientId} Connection closed`);
-    clients = clients.filter((client) => client.id !== clientId);
+    clients.closeClient(clientId);
   });
 };
 
