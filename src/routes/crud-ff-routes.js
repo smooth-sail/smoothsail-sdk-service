@@ -1,10 +1,12 @@
 import express from 'express';
+import * as flagsControllers from '../controllers/flags-api-controllers';
 
 const router = express.Router();
 
-router.all('/', (req, res) => {
-
-  res.status(200).json({ msg: "hello world" });;
-});
+router.get('/flags', flagsControllers.getAllFlags);
+router.get('/flags/:id', flagsControllers.getFlagById);
+router.post('/flags', flagsControllers.createFlag);
+router.delete('/flags/:id', flagsControllers.deleteFlag);
+router.put('/flags/:id', flagsControllers.updateFlag);
 
 module.exports = router;
