@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+// import EventEmitter from "events";
 import Clients from "../models/sse-clients";
 import pg from "../db/flags";
 
@@ -46,6 +46,8 @@ export const createFlag = async (req, res) => {
   }
 
   res.status(200).json(flag);
+  let sseMsg = { type: "new-flag", payload: flag };
+  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const deleteFlag = async (req, res) => {
@@ -67,6 +69,8 @@ export const deleteFlag = async (req, res) => {
   }
 
   res.status(200).json({ message: "Flag successfully deleted." });
+  let sseMsg = { type: "deleted-flag", payload: flag };
+  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const updateFlag = async (req, res) => {
@@ -103,7 +107,9 @@ export const updateFlag = async (req, res) => {
       .json({ error: "Internal error occured. Could not update flag." });
   }
 
-  res.status(200).json({ flag: updatedFlag });
+  res.status(200).json(updatedFlag);
+  let sseMsg = { type: "update", payload: updateFlag };
+  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const sseNotifications = (req, res) => {
