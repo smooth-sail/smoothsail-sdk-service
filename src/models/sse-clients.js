@@ -1,4 +1,4 @@
-export class Clients {
+class Clients {
   constructor() {
     this.allClients = [];
   }

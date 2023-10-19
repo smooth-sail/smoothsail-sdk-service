@@ -15,12 +15,8 @@ const getFlag = async (flagId) => {
   return rows[0];
 };
 
-const createFlag = async (newFlag) => {
+const createFlag = async ({ title, description, is_active }) => {
   const client = await getClient();
-  const title = newFlag.title;
-  const description = newFlag.description || "";
-  const is_active = newFlag.is_active || false;
-
   const query =
     "INSERT INTO flags (title, description, is_active) VALUES ($1, $2, $3) RETURNING *";
   const values = [title, description, is_active];
@@ -37,12 +33,9 @@ const deleteFlag = async (flagId) => {
   return rows[0];
 };
 
-const updateFlag = async (flagId, flagUpdates) => {
+const updateFlag = async (flagId, { title, description, is_active }) => {
+  console.log(title, description, is_active);
   const client = await getClient();
-  const title = flagUpdates.title;
-  const description = flagUpdates.description || "";
-  const is_active = flagUpdates.is_active || false;
-
   const query =
     "UPDATE flags SET (title, description, is_active) = ($1, $2, $3) WHERE id = $4 RETURNING *";
   const values = [title, description, is_active, flagId];

@@ -1,6 +1,7 @@
 // import EventEmitter from "events";
 import Clients from "../models/sse-clients";
 import pg from "../db/flags";
+import Flag from "../models/flags";
 
 let clients = new Clients();
 
@@ -19,8 +20,6 @@ export const getAllFlags = async (req, res) => {
 export const getFlagById = async (req, res) => {
   const flagId = req.params.id;
 
-  // check if flag id is correct
-
   let flag;
   try {
     flag = await pg.getFlag(flagId);
@@ -36,48 +35,40 @@ export const getFlagById = async (req, res) => {
 };
 
 export const createFlag = async (req, res) => {
-  // validate inputs
-
-  let flag;
   try {
-    flag = await pg.createFlag(req.body);
+    let newFlag = new Flag(req.body);
+    let flag = await pg.createFlag(newFlag);
+    res.status(200).json(flag);
+    let sseMsg = { type: "new-flag", payload: flag };
+    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
   } catch (error) {
     res.status(500).json({ error: "Internal error occured." });
   }
-
-  res.status(200).json(flag);
-  let sseMsg = { type: "new-flag", payload: flag };
-  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const deleteFlag = async (req, res) => {
   const flagId = req.params.id;
 
-  // check flagId if valid?
-
   let flag;
   try {
     flag = await pg.deleteFlag(flagId);
+    if (!flag) {
+      res.status(404).json({ error: `Flag with id ${flagId} does not exist.` });
+      return;
+    }
+
+    res.status(200).json({ message: "Flag successfully deleted." });
+    let sseMsg = { type: "deleted-flag", payload: flag };
+    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
   } catch (error) {
     res
       .status(500)
       .json({ error: "Internal error occured. Could not delete flag." });
   }
-
-  if (!flag) {
-    res.status(404).json({ error: `Flag with id ${flagId} does not exist.` });
-  }
-
-  res.status(200).json({ message: "Flag successfully deleted." });
-  let sseMsg = { type: "deleted-flag", payload: flag };
-  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const updateFlag = async (req, res) => {
   const flagId = req.params.id;
-
-  // validate flagId
-  // validate new flag info
 
   let flag;
   try {
@@ -90,26 +81,18 @@ export const updateFlag = async (req, res) => {
     res.status(404).json({ error: `Flag with id ${flagId} does not exist.` });
   }
 
-  const flagUpdates = req.body;
-  flagUpdates.title ||= flag.title;
-  flagUpdates.description ||= flag.description;
-  flagUpdates.is_active =
-    flagUpdates.is_active !== undefined
-      ? flagUpdates.is_active
-      : flag.is_active;
-
-  let updatedFlag;
+  let newFlag = new Flag(flag);
+  newFlag.updateAttr(req.body);
   try {
-    updatedFlag = await pg.updateFlag(flagId, flagUpdates);
+    let updatedFlag = await pg.updateFlag(flagId, newFlag);
+    res.status(200).json(updatedFlag);
+    let sseMsg = { type: "update", payload: updatedFlag };
+    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
   } catch (error) {
     res
       .status(500)
       .json({ error: "Internal error occured. Could not update flag." });
   }
-
-  res.status(200).json(updatedFlag);
-  let sseMsg = { type: "update", payload: updateFlag };
-  return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
 };
 
 export const sseNotifications = (req, res) => {
