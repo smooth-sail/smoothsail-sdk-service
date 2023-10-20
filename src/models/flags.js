@@ -1,11 +1,12 @@
 class Flag {
   constructor({ title, description, is_active }) {
-    this.title = this.validateTitle(title);
-    this.description = this.validateDescription(description);
-    this.is_active = this.validateIsActive(is_active);
+    this.title = Flag.parseTitle(title);
+    this.description = Flag.parseDescription(description);
+    this.is_active = Flag.setIsActive(is_active);
   }
-  validateTitle(title) {
-    if (!title) {
+
+  static parseTitle(title) {
+    if (!Flag.validateTitle(title)) {
       throw new Error({ error: "Title is required" });
     }
 
@@ -15,30 +16,41 @@ class Flag {
 
     return title;
   }
-  validateDescription(description) {
-    if (!description) {
+
+  static validateTitle(title) {
+    return !!title;
+  }
+
+  static parseDescription(description) {
+    if (!Flag.validateDescription(description)) {
       description = "";
     }
 
     return description;
   }
-  validateIsActive(is_active) {
+
+  static validateDescription(description) {
+    return !!description;
+  }
+
+  static setIsActive(is_active) {
     if (is_active === true || is_active === false) {
       return is_active;
     }
 
     return false;
   }
-  updateAttr({ title, description, is_active }) {
+
+  updateProps({ title, description, is_active }) {
     if (title) {
-      this.title = this.validateTitle(title);
+      this.title = Flag.parseTitle(title);
     }
 
     if (description) {
-      this.description = this.validateDescription(description);
+      this.description = Flag.parseDescription(description);
     }
 
-    this.is_active = this.validateIsActive(is_active);
+    this.is_active = Flag.setIsActive(is_active);
   }
 }
 

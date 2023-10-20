@@ -14,7 +14,6 @@ export const getAllFlags = async (req, res) => {
   }
 
   res.status(200).json(flags);
-  return clients.sendNotificationToAllClients("all flags were fetched"); // here updates msg is sent to all sse connected clients
 };
 
 export const getFlagById = async (req, res) => {
@@ -40,7 +39,7 @@ export const createFlag = async (req, res) => {
     let flag = await pg.createFlag(newFlag);
     res.status(200).json(flag);
     let sseMsg = { type: "new-flag", payload: flag };
-    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
     res.status(500).json({ error: "Internal error occured." });
   }
@@ -59,7 +58,7 @@ export const deleteFlag = async (req, res) => {
 
     res.status(200).json({ message: "Flag successfully deleted." });
     let sseMsg = { type: "deleted-flag", payload: flag };
-    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
     res
       .status(500)
@@ -82,12 +81,12 @@ export const updateFlag = async (req, res) => {
   }
 
   let newFlag = new Flag(flag);
-  newFlag.updateAttr(req.body);
+  newFlag.updateProps(req.body);
   try {
     let updatedFlag = await pg.updateFlag(flagId, newFlag);
     res.status(200).json(updatedFlag);
     let sseMsg = { type: "update", payload: updatedFlag };
-    return clients.sendNotificationToAllClients(sseMsg); // here updates msg is sent to all sse connected clients
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
     res
       .status(500)

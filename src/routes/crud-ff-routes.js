@@ -12,5 +12,4 @@ router.put("/flags/:id", flagsControllers.updateFlag);
 // SSE API related routes
 router.get("/ff-updates-stream", flagsControllers.sseNotifications);
 
-module.exports = router;
-
+export default router;
