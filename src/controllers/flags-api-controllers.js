@@ -1,21 +1,27 @@
-export const getAllFlags = (req, res) => {
+// import EventEmitter from "events";
+import Clients from "../models/sse-clients";
+import pg from "../db/flags";
+import Flag from "../models/flags";
+
+let clients = new Clients();
+
+export const getAllFlags = async (req, res) => {
   let flags;
   try {
-    // fetch all flags data
+    flags = await pg.getAllFlags();
   } catch (err) {
     res.status(500).json({ error: "Internal error occured." });
   }
-  res.status(200).json({ flags });
+
+  res.status(200).json(flags);
 };
 
-export const getFlagById = (req, res) => {
-  const flagId = req.params.flagId;
-
-  // check if flag id is correct
+export const getFlagById = async (req, res) => {
+  const flagId = req.params.id;
 
   let flag;
   try {
-    // get flag by flag id
+    flag = await pg.getFlag(flagId);
   } catch (err) {
     res.status(500).json({ error: "Internal error occured." });
   }
@@ -24,64 +30,90 @@ export const getFlagById = (req, res) => {
     res.status(404).json({ error: `Flag with id ${flagId} does not exist` });
   }
 
-  res.status(200).json({ flag });
+  res.status(200).json(flag);
 };
 
-export const createFlag = (req, res) => {
-  // validate inputs
-  
-  let flag;
+export const createFlag = async (req, res) => {
   try {
-    // attempt to creat new flag
+    let newFlag = new Flag(req.body);
+    let flag = await pg.createFlag(newFlag);
+    res.status(200).json(flag);
+    let sseMsg = { type: "new-flag", payload: flag };
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
     res.status(500).json({ error: "Internal error occured." });
   }
-
-  res.status(200).json({ flag });
 };
 
-export const deleteFlag = (req, res) => {
-  const flagId = req.params.flagId;
-
-  // check flagId if valid?
+export const deleteFlag = async (req, res) => {
+  const flagId = req.params.id;
 
   let flag;
   try {
-    // find flag by id
+    flag = await pg.deleteFlag(flagId);
+    if (!flag) {
+      res.status(404).json({ error: `Flag with id ${flagId} does not exist.` });
+      return;
+    }
+
+    res.status(200).json({ message: "Flag successfully deleted." });
+    let sseMsg = { type: "deleted-flag", payload: flag };
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
-    res.status(500).json({ error: "Internal error occured. Could not delete flag." });
+    res
+      .status(500)
+      .json({ error: "Internal error occured. Could not delete flag." });
   }
-
-  if (!flag) {
-    res.status(404).json({ error: `Flag with id ${flagId} does not exist.`});
-  }
-
-  res.status(200).json({ message: 'Flag successfully deleted.' });
 };
 
-export const updateFlag = (req, res) => {
-  const flagId = req.params.flagId;
-
-  // validate flagId
-  // validate new flag info
+export const updateFlag = async (req, res) => {
+  const flagId = req.params.id;
 
   let flag;
   try {
-    // find flag by id
+    flag = await pg.getFlag(flagId);
   } catch (error) {
     res.status(500).json({ error: "Internal error occured." });
   }
 
   if (!flag) {
-    res.status(404).json({ error: `Flag with id ${flagId} does not exist.`});
+    res.status(404).json({ error: `Flag with id ${flagId} does not exist.` });
   }
 
-  let updatedFlag;
+  let newFlag = new Flag(flag);
+  newFlag.updateProps(req.body);
   try {
-    // update flag
+    let updatedFlag = await pg.updateFlag(flagId, newFlag);
+    res.status(200).json(updatedFlag);
+    let sseMsg = { type: "update", payload: updatedFlag };
+    return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
-    res.status(500).json({ error: "Internal error occured. Could not update flag." });
+    res
+      .status(500)
+      .json({ error: "Internal error occured. Could not update flag." });
   }
-
-  res.status(200).json({ flag: updatedFlag });
 };
+
+export const sseNotifications = (req, res) => {
+  const headers = {
+    "Content-Type": "text/event-stream",
+    Connection: "keep-alive",
+    "Cache-Control": "no-cache",
+  };
+  res.writeHead(200, headers);
+
+  const clientId = clients.addNewClient(res);
+
+  const connectMsg = `SSE connection established with client id: ${clientId}`;
+  console.log(connectMsg);
+
+  let data = `data: ${JSON.stringify({ msg: connectMsg })}\n\n`;
+  res.write(data);
+
+  req.on("close", () => {
+    console.log(`${clientId} Connection closed`);
+    clients.closeClient(clientId);
+  });
+};
+
+// router.get('/status', (req, res) => res.json({clients: clients.length})); // tmp route
