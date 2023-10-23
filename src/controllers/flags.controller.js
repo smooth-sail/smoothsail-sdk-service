@@ -10,7 +10,7 @@ export const getAllFlags = async (req, res) => {
   try {
     flags = await pg.getAllFlags();
   } catch (err) {
-    res.status(500).json({ error: "Internal error occured." });
+    res.status(500).json({ error: "Internal error occurred." });
   }
 
   res.status(200).json(flags);
@@ -23,7 +23,7 @@ export const getFlagById = async (req, res) => {
   try {
     flag = await pg.getFlag(flagId);
   } catch (err) {
-    res.status(500).json({ error: "Internal error occured." });
+    res.status(500).json({ error: "Internal error occurred." });
   }
 
   if (!flag) {
@@ -41,7 +41,7 @@ export const createFlag = async (req, res) => {
     let sseMsg = { type: "new-flag", payload: flag };
     return clients.sendNotificationToAllClients(sseMsg);
   } catch (error) {
-    res.status(500).json({ error: "Internal error occured." });
+    res.status(500).json({ error: "Internal error occurred." });
   }
 };
 
@@ -62,7 +62,7 @@ export const deleteFlag = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ error: "Internal error occured. Could not delete flag." });
+      .json({ error: "Internal error occurred. Could not delete flag." });
   }
 };
 
@@ -73,7 +73,7 @@ export const updateFlag = async (req, res) => {
   try {
     flag = await pg.getFlag(flagId);
   } catch (error) {
-    res.status(500).json({ error: "Internal error occured." });
+    res.status(500).json({ error: "Internal error occurred." });
   }
 
   if (!flag) {
@@ -90,7 +90,7 @@ export const updateFlag = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ error: "Internal error occured. Could not update flag." });
+      .json({ error: "Internal error occurred. Could not update flag." });
   }
 };
 
