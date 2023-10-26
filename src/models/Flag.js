@@ -33,21 +33,6 @@ export class Flag {
     }
   }
 
-  evaluateFlag(userContext = {}) {
-    return this.is_active && this.isUserInASegment(userContext);
-  }
-
-  isUserInASegment(userContext) {
-    if (this.segments.length === 0) {
-      return true;
-    }
-
-    // check if user context evals to true for any associated segment
-    return this.segments.some((segment) =>
-      segment.evaluateSegment(userContext)
-    );
-  }
-
   addSegment(segment) {
     this.segments.push(new Segment(segment));
   }
