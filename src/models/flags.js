@@ -52,4 +52,8 @@ export class Flags {
         break;
     }
   }
+
+  formattedForSDK() {
+    return JSON.parse(JSON.stringify(this.flagData));
+  }
 }

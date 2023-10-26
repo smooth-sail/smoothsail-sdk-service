@@ -10,31 +10,30 @@ const app = express();
 app.use(cors()); // this should be later replaced with whitelisted domains
 app.use(express.json());
 
-let flagData;
-
+// initial fetch of flag data when application spun up
 const GET_ALL_FLAGS = "http://localhost:3000/api/sdk/flags";
-
+let flagData;
 (async () => {
   const { data } = await axios.get(GET_ALL_FLAGS);
   flagData = new Flags(data.payload);
-  console.log("flag data: ", flagData);
-
-  // with test data
-  // let featureFlags = TEST_FLAGS.payload;
-  // for (let flag in featureFlags) {
-  //   flagData[flag] = new Flag(featureFlags[flag]);
-  //   console.log(flagData);
-  // }
+  console.log("flag data: ", flagData.formattedForSDK());
 })();
 
 // test subscriber
 app.post("/flagUpdates", (req, res) => {
   flagData.updateFlagData(req.body);
-  console.log("flag data: ", flagData);
+  console.log("flag data: ", flagData.formattedForSDK());
 
-  res.status(200).json({ flagData });
+  // write to SSE stream
+  res.status(200).json({ flags: flagData.formattedForSDK() });
 });
 
+// route for SDK to fetch routes
+app.get("/sdk/flags", (req, res) => {
+  res.status(200).json({ flags: flagData.formattedForSDK() });
+});
+
+// not used on first iteration
 // app.use("/api", apiRouter);
 
 app.use("/", (req, res) => {
