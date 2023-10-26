@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import apiRouter from "./routes/Api.routes";
+import jsm from "./nats";
 
 const app = express();
 app.use(cors()); // this should be later replaced with whitelisted domains
