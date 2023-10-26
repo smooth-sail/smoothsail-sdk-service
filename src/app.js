@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import axios from "axios";
-import apiRouter from "./routes/Api.routes";
+// import apiRouter from "./routes/Api.routes";
 import { Flags } from "./models/flags";
 
 const app = express();
@@ -22,9 +22,11 @@ let flagData;
 // test subscriber
 app.post("/flagUpdates", (req, res) => {
   flagData.updateFlagData(req.body);
-  console.log("flag data: ", flagData.formattedForSDK());
 
   // write to SSE stream
+
+  // flags logged & sent back for POSTman tests
+  console.log("flag data: ", flagData.formattedForSDK());
   res.status(200).json({ flags: flagData.formattedForSDK() });
 });
 
