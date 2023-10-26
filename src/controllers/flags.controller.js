@@ -1,6 +1,6 @@
 // import EventEmitter from "events";
 import Clients from "../models/sse-clients";
-import Flag from "../models/flags";
+// import Flag from "../models/flags";
 
 let clients = new Clients();
 

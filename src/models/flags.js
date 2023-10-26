@@ -1,57 +1,55 @@
-class Flag {
-  constructor({ title, description, is_active }) {
-    this.title = Flag.parseTitle(title);
-    this.description = Flag.parseDescription(description);
-    this.is_active = Flag.setIsActive(is_active);
+import { Flag } from "./flag";
+
+export class Flags {
+  constructor(flags) {
+    this.flagData = {};
+
+    for (let flag in flags) {
+      this.flagData[flag] = new Flag(flags[flag]);
+    }
   }
 
-  static parseTitle(title) {
-    if (!Flag.validateTitle(title)) {
-      throw new Error({ error: "Title is required" });
+  updateFlagData(notification) {
+    let flag = this.flagData[notification.payload["f_key"]];
+
+    switch (notification.type) {
+      case "new-flag":
+        this.flagData[notification.payload["f_key"]] = new Flag(
+          notification.payload
+        );
+        break;
+      case "toggle":
+        flag.updateFlag(notification.payload);
+        break;
+      case "deleted-flag":
+        delete this.flagData[notification.payload["f_key"]];
+        break;
+      case "segment add":
+        flag.addSegment(notification.payload.segment);
+        break;
+      case "segment remove":
+        flag.removeSegment(notification.payload);
+        break;
+      case "segment body update":
+        for (let f in this.flagData) {
+          f.updateSegmentBody(notification.payload);
+        }
+        break;
+      case "rule add":
+        for (let f in this.flagData) {
+          f.addRule(notification.payload);
+        }
+        break;
+      case "rule remove":
+        for (let f in this.flagData) {
+          f.removeRule(notification.payload);
+        }
+        break;
+      case "rule update":
+        for (let f in this.flagData) {
+          f.updateSegmentRule(notification.payload);
+        }
+        break;
     }
-
-    if (title.length > 100) {
-      title = title.slice(0, 100);
-    }
-
-    return title;
-  }
-
-  static validateTitle(title) {
-    return !!title;
-  }
-
-  static parseDescription(description) {
-    if (!Flag.validateDescription(description)) {
-      description = "";
-    }
-
-    return description;
-  }
-
-  static validateDescription(description) {
-    return !!description;
-  }
-
-  static setIsActive(is_active) {
-    if (is_active === true || is_active === false) {
-      return is_active;
-    }
-
-    return false;
-  }
-
-  updateProps({ title, description, is_active }) {
-    if (title) {
-      this.title = Flag.parseTitle(title);
-    }
-
-    if (description) {
-      this.description = Flag.parseDescription(description);
-    }
-
-    this.is_active = Flag.setIsActive(is_active);
   }
 }
-
-export default Flag;

@@ -1,4 +1,4 @@
-import { Rule } from "./Rule";
+import { Rule } from "./rule";
 
 export class Segment {
   constructor({ s_key, rules_operator, rules }) {
