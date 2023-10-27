@@ -1,18 +1,16 @@
 // import EventEmitter from "events";
+import FlagCache from "../cache/flagCache";
 import Clients from "../models/sse-clients";
 // import Flag from "../models/flags";
 
 let clients = new Clients();
 
 export const getAllFlags = async (req, res) => {
-  let flags;
   try {
-    // flags = await pg.getAllFlags();
+    res.status(200).json({ payload: FlagCache });
   } catch (err) {
     res.status(500).json({ error: "Internal error occurred." });
   }
-
-  res.status(200).json(flags);
 };
 
 export const getFlagById = async (req, res) => {
