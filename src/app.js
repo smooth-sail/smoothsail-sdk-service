@@ -3,8 +3,10 @@ import express from "express";
 import cors from "cors";
 import axios from "axios";
 import apiRouter from "./routes/Api.routes";
+import jsm from "./nats";
 import FlagCache from "./cache/flagCache";
 import { Flag } from "./models/flag";
+
 
 const app = express();
 
