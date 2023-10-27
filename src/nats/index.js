@@ -1,21 +1,23 @@
 import "dotenv/config";
-import {
-  connect,
-  JSONCodec,
-  StringCodec,
-  consumerOpts,
-  createInbox,
-} from "nats";
+import { connect, StringCodec, consumerOpts, createInbox } from "nats";
+
+const handleMessage = (err, msg) => {
+  if (err) {
+    console.error("Error:", err);
+  } else {
+    console.log(JSON.parse(StringCodec().decode(msg.data)));
+    msg.ack();
+  }
+};
 
 class JetstreamManager {
   constructor() {
     this.sc = StringCodec();
-    this.jc = JSONCodec();
   }
 
   async init() {
     await this.connectToJetStream();
-    await this.subscribeToStream();
+    await this.subscribeToStream("FLAG_DATA", "request", handleMessage);
   }
 
   async connectToJetStream() {
@@ -23,26 +25,25 @@ class JetstreamManager {
     this.jetstream = this.natsConnection.jetstream();
   }
 
-  async subscribeToStream() {
-    const sub = await this.jetstream.subscribe(
-      "FLAG_DATA.request",
-      this.config("request")
+  async subscribeToStream(stream, subject, handler) {
+    await this.jetstream.subscribe(
+      `${stream}.${subject}`,
+      this.config(subject, handler)
     );
-
-    (async () => {
-      for await (const m of sub) {
-        console.log(JSON.parse(this.sc.decode(m.data)));
-        m.ack();
-      }
-    })(sub);
   }
 
-  config(subject) {
+  config(subject, handler) {
     const opts = consumerOpts();
     opts.durable(subject);
     opts.manualAck();
-    opts.ackExplicit();
-    opts.deliverTo(createInbox());
+    // opts.ackExplicit();
+
+    // This can be used to handle incoming messages.
+    opts.callback(handler);
+
+    // Needed for a push consumer later if we request feature flag data
+    // through NATS Jetstream instead of REST API.
+    // opts.deliverTo(createInbox());
 
     return opts;
   }
