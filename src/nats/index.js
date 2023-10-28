@@ -1,11 +1,18 @@
 import "dotenv/config";
 import { connect, StringCodec, consumerOpts, createInbox } from "nats";
+import { handleUpdateNotification } from "../utils/flags";
+import clients from "../models/sse-clients";
+import FlagCache from "../cache/flagCache";
 
 const handleMessage = (err, msg) => {
   if (err) {
     console.error("Error:", err);
   } else {
-    console.log(JSON.parse(StringCodec().decode(msg.data)));
+    let message = JSON.parse(StringCodec().decode(msg.data));
+    // update the flag cache based on the message
+    handleUpdateNotification(message);
+    // send the latest flag cache to all clients via SSE
+    clients.sendNotificationToAllClients(FlagCache);
     msg.ack();
   }
 };
@@ -35,6 +42,7 @@ class JetstreamManager {
   config(subject, handler) {
     const opts = consumerOpts();
     opts.durable(subject);
+    opts.deliverTo(subject);
     opts.manualAck();
     // opts.ackExplicit();
 
