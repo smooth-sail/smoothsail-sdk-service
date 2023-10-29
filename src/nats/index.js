@@ -37,14 +37,14 @@ class JetstreamManager {
   }
 
   async connectToJetStream() {
-    this.natsConnection = await connect({ servers: process.env.NATS_SERVER });
-    this.jetstream = this.natsConnection.jetstream();
+    this.nc = await connect({ servers: process.env.NATS_SERVER });
+    this.js = this.nc.jetstream();
   }
 
-  async subscribeToStream(stream, subject, handler) {
-    await this.jetstream.subscribe(
+  async subscribeToStream(stream, subject, callbackFn) {
+    await this.js.subscribe(
       `${stream}.${subject}`,
-      this.config(subject, handler)
+      this.createConfig(subject, callbackFn)
     );
   }
 
@@ -60,16 +60,14 @@ class JetstreamManager {
       });
   }
 
-  config(subject, handler) {
+  createConfig(subject, callbackFn) {
     const opts = consumerOpts();
-    opts.durable(subject);
-    opts.manualAck();
-    opts.deliverNew();
-    // opts.ackExplicit();
 
-    // This can be used to handle incoming messages.
-    opts.callback(handler.bind(this));
+    opts.deliverNew();
     opts.deliverTo(createInbox());
+    opts.durable(subject);
+    callbackFn && opts.callback(callbackFn.bind(this));
+    opts.manualAck();
 
     return opts;
   }

@@ -7,7 +7,6 @@ import jsm from "./nats";
 import FlagCache from "./cache/flagCache";
 import { Flag } from "./models/flag";
 
-
 const app = express();
 
 app.use(cors()); // this should be later replaced with whitelisted domains
