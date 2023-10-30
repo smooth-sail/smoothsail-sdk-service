@@ -14,7 +14,7 @@ export const handleUpdateNotification = (notification) => {
       delete FlagCache[notification.payload];
       break;
     case "segment add":
-      flag.addSegment(notification.payload.segment);
+      flag.addSegment(notification.payload.plainSegment);
       break;
     case "segment remove":
       flag.removeSegment(notification.payload);
@@ -43,4 +43,10 @@ export const handleUpdateNotification = (notification) => {
 
   console.log("message from stream: ", notification);
   console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
+};
+
+export const addFlagsToCache = (payload) => {
+  for (let flag in payload) {
+    FlagCache[flag] = new Flag(payload[flag]);
+  }
 };
