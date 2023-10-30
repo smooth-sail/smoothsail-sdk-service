@@ -12,7 +12,7 @@ const handleFlagUpdate = (err, msg) => {
     // update the flag cache based on the message
     handleUpdateNotification(message);
     // send the latest flag cache to all clients via SSE
-    clients.sendNotificationToAllClients(FlagCache);
+    clients.sendNotificationToAllClients({ type: "flags", payload: FlagCache });
     msg.ack();
   }
 };
