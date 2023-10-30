@@ -4,15 +4,25 @@ import { handleUpdateNotification } from "../utils/flags";
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
 
-const handleMessage = (err, msg) => {
+const handleFlagUpdate = (err, msg) => {
   if (err) {
     console.error("Error:", err);
   } else {
-    let message = JSON.parse(StringCodec().decode(msg.data));
+    const message = JSON.parse(StringCodec().decode(msg.data));
     // update the flag cache based on the message
     handleUpdateNotification(message);
     // send the latest flag cache to all clients via SSE
     clients.sendNotificationToAllClients(FlagCache);
+    msg.ack();
+  }
+};
+
+const handleFlagsReply = (err, msg) => {
+  if (err) {
+    console.error("Error:", err);
+  } else {
+    console.log(JSON.parse(StringCodec().decode(msg.data)));
+    // Handle updating flag cache.
     msg.ack();
   }
 };
@@ -24,34 +34,47 @@ class JetstreamManager {
 
   async init() {
     await this.connectToJetStream();
-    await this.subscribeToStream("FLAG_DATA", "request", handleMessage);
-  }
-
-  async connectToJetStream() {
-    this.natsConnection = await connect({ servers: process.env.NATS_SERVER });
-    this.jetstream = this.natsConnection.jetstream();
-  }
-
-  async subscribeToStream(stream, subject, handler) {
-    await this.jetstream.subscribe(
-      `${stream}.${subject}`,
-      this.config(subject, handler)
+    await this.subscribeToStream("FLAG_DATA", "FLAG_UPDATE", handleFlagUpdate);
+    await this.subscribeToStream(
+      "FLAG_DATA",
+      "GET_ALL_FLAGS",
+      handleFlagsReply
     );
   }
 
-  config(subject, handler) {
+  async connectToJetStream() {
+    this.nc = await connect({ servers: process.env.NATS_SERVER });
+    this.js = this.nc.jetstream();
+  }
+
+  async subscribeToStream(stream, subject, callbackFn) {
+    await this.js.subscribe(
+      `${stream}.${subject}`,
+      this.createConfig(subject, callbackFn)
+    );
+  }
+
+  async requestAllFlags() {
+    const encodedMessage = this.sc.encode("Request all flags");
+    await this.js
+      .publish("FLAG_DATA.REQUEST_ALL_FLAGS", encodedMessage)
+      .catch((err) => {
+        throw Error(
+          err,
+          "NATS Jetstream: Publish message has failed. Check your connection."
+        );
+      });
+  }
+
+  createConfig(subject, callbackFn) {
     const opts = consumerOpts();
+
+    opts.deliverNew();
+    opts.deliverTo(createInbox());
     opts.durable(subject);
     opts.deliverTo(subject);
     opts.manualAck();
-    // opts.ackExplicit();
-
-    // This can be used to handle incoming messages.
-    opts.callback(handler);
-
-    // Needed for a push consumer later if we request feature flag data
-    // through NATS Jetstream instead of REST API.
-    // opts.deliverTo(createInbox());
+    callbackFn && opts.callback(callbackFn.bind(this));
 
     return opts;
   }
