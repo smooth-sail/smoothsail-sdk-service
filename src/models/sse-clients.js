@@ -22,4 +22,6 @@ class Clients {
   }
 }
 
-export default Clients;
+let clients = new Clients();
+
+export default clients;
