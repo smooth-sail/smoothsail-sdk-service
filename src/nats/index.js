@@ -11,7 +11,7 @@ const handleFlagUpdate = (err, msg) => {
   }
 };
 
-const handleFlagsRequest = (err, msg) => {
+const handleFlagsReply = (err, msg) => {
   if (err) {
     console.error("Error:", err);
   } else {
@@ -32,7 +32,7 @@ class JetstreamManager {
     await this.subscribeToStream(
       "FLAG_DATA",
       "GET_ALL_FLAGS",
-      handleFlagsRequest
+      handleFlagsReply
     );
   }
 
@@ -66,8 +66,8 @@ class JetstreamManager {
     opts.deliverNew();
     opts.deliverTo(createInbox());
     opts.durable(subject);
-    callbackFn && opts.callback(callbackFn.bind(this));
     opts.manualAck();
+    callbackFn && opts.callback(callbackFn.bind(this));
 
     return opts;
   }
