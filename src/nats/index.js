@@ -23,7 +23,7 @@ const handleFlagsReply = (err, msg) => {
     console.error("Error:", err);
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
-    addFlagsToCache(data.payload);
+    addFlagsToCache(data);
     console.log("Flags have been retrieved:", FlagCache);
     msg.ack();
   }

@@ -45,8 +45,8 @@ export const handleUpdateNotification = (notification) => {
   console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
 };
 
-export const addFlagsToCache = (payload) => {
-  for (let flag in payload) {
-    FlagCache[flag] = new Flag(payload[flag]);
+export const addFlagsToCache = (data) => {
+  for (let flag in data) {
+    FlagCache[flag] = new Flag(data[flag]);
   }
 };
