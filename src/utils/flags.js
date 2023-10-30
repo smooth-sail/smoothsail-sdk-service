@@ -12,7 +12,7 @@ export const handleUpdateNotification = (notification) => {
       flag.updateFlag(notification.payload);
       break;
     case "deleted-flag":
-      delete FlagCache[notification.payload["f_key"]];
+      delete FlagCache[notification.payload];
       break;
     case "segment add":
       flag.addSegment(notification.payload.segment);
@@ -41,4 +41,7 @@ export const handleUpdateNotification = (notification) => {
       }
       break;
   }
+
+  console.log("message from stream: ", notification);
+  console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
 };

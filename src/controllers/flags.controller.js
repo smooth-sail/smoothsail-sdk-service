@@ -1,9 +1,10 @@
 // import EventEmitter from "events";
 import FlagCache from "../cache/flagCache";
-import Clients from "../models/sse-clients";
+// import Clients from "../models/sse-clients";
+import clients from "../models/sse-clients";
 // import Flag from "../models/flags";
 
-let clients = new Clients();
+// let clients = new Clients();
 
 export const getAllFlags = async (req, res) => {
   try {
