@@ -1,9 +1,9 @@
 import { Rule } from "./rule";
 
 export class Segment {
-  constructor({ s_key, rules_operator, rules }) {
-    this.s_key = s_key;
-    this.rules_operator = rules_operator;
+  constructor({ sKey, rulesOperator, rules }) {
+    this.sKey = sKey;
+    this.rulesOperator = rulesOperator;
     this.rules = [];
     if (rules && rules.length !== 0) {
       rules.forEach((rule) => {
@@ -12,9 +12,9 @@ export class Segment {
     }
   }
 
-  updateSegmentBody({ s_key, rules_operator, rules }) {
-    this.s_key = s_key;
-    this.rules_operator = rules_operator;
+  updateSegmentBody({ sKey, rulesOperator, rules }) {
+    this.sKey = sKey;
+    this.rulesOperator = rulesOperator;
     this.rules = [];
     if (rules && rules.length !== 0) {
       rules.forEach((rule) => {
@@ -29,14 +29,14 @@ export class Segment {
 
   removeRule(removeRule) {
     let newRules = this.rules.filter(
-      (rule) => rule["r_key"] !== removeRule["r_key"]
+      (rule) => rule["rKey"] !== removeRule["rKey"]
     );
     this.rules = newRules;
   }
 
   updateSegmentRule(updatedRule) {
     let updatedRules = this.rules.map((rule) => {
-      if (updatedRule["r_key"] === rule["r_key"]) {
+      if (updatedRule["rKey"] === rule["rKey"]) {
         return new Rule(updatedRule);
       } else {
         return rule;

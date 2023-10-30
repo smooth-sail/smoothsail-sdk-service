@@ -9,6 +9,7 @@ const handleFlagUpdate = (err, msg) => {
     console.error("Error:", err);
   } else {
     const message = JSON.parse(StringCodec().decode(msg.data));
+    console.log(message);
     // update the flag cache based on the message
     handleUpdateNotification(message);
     // send the latest flag cache to all clients via SSE
