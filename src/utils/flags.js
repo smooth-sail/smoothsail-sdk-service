@@ -2,11 +2,10 @@ import FlagCache from "../cache/flagCache";
 import { Flag } from "../models/flag";
 
 export const handleUpdateNotification = (notification) => {
-  let flag = FlagCache[notification.payload["f_key"]];
-
+  let flag = FlagCache[notification.payload["fKey"]];
   switch (notification.type) {
     case "new-flag":
-      FlagCache[notification.payload["f_key"]] = new Flag(notification.payload);
+      FlagCache[notification.payload["fKey"]] = new Flag(notification.payload);
       break;
     case "toggle":
       flag.updateFlag(notification.payload);

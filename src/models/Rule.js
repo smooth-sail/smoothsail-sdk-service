@@ -1,9 +1,9 @@
 export class Rule {
-  constructor({ r_key, type, operator, value, a_key }) {
-    this.r_key = r_key;
+  constructor({ rKey, type, operator, value, aKey }) {
+    this.rKey = rKey;
     this.type = type;
     this.operator = operator;
     this.value = value;
-    this.a_key = a_key;
+    this.aKey = aKey;
   }
 }
