@@ -1,4 +1,4 @@
-import { Segment } from "./segment";
+import { Segment } from "./Segment";
 
 export class Flag {
   constructor({ fKey, isActive, createdAt, updatedAt, segments }) {

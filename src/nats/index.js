@@ -3,7 +3,7 @@ import { connect, StringCodec, consumerOpts, createInbox } from "nats";
 import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
-import { Flag } from "../models/flag";
+import { Flag } from "../models/Flag";
 
 const handleFlagUpdate = (err, msg) => {
   if (err) {
