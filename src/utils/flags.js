@@ -1,5 +1,5 @@
 import FlagCache from "../cache/flagCache";
-import { Flag } from "../models/flag";
+import { Flag } from "../models/Flag";
 
 export const handleUpdateNotification = (notification) => {
   let flag = FlagCache[notification.payload["fKey"]];

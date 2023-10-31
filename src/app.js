@@ -1,11 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import axios from "axios";
+// import axios from "axios";
 import apiRouter from "./routes/Api.routes";
 import jsm from "./nats";
-import FlagCache from "./cache/flagCache";
-import { Flag } from "./models/flag";
+// import FlagCache from "./cache/flagCache";
+// import { Flag } from "./models/Flag";
 
 const app = express();
 
