@@ -21,28 +21,34 @@ export const handleUpdateNotification = (notification) => {
       break;
     case "segment body update":
       for (let f in FlagCache) {
-        f.updateSegmentBody(notification.payload);
+        FlagCache[f].updateSegmentBody(notification.payload);
       }
       break;
     case "rule add":
       for (let f in FlagCache) {
-        f.addRule(notification.payload);
+        FlagCache[f].addRule(notification.payload);
       }
       break;
     case "rule remove":
       for (let f in FlagCache) {
-        f.removeRule(notification.payload);
+        FlagCache[f].removeRule(notification.payload);
       }
       break;
     case "rule update":
       for (let f in FlagCache) {
-        f.updateSegmentRule(notification.payload);
+        FlagCache[f].updateSegmentRule(notification.payload);
       }
       break;
   }
 
   console.log("message from stream: ", notification);
   console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
+  // additional logs to see segments and rules updated in flag 1
+  console.log("flag 1: ", JSON.parse(JSON.stringify(FlagCache["flag-1"])));
+  console.log(
+    "flag 1 rules: ",
+    JSON.parse(JSON.stringify(FlagCache["flag-1"].segments[0]))
+  );
 };
 
 export const addFlagsToCache = (data) => {
