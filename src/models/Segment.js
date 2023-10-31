@@ -12,15 +12,9 @@ export class Segment {
     }
   }
 
-  updateSegmentBody({ sKey, rulesOperator, rules }) {
+  updateSegmentBody({ sKey, rulesOperator }) {
     this.sKey = sKey;
     this.rulesOperator = rulesOperator;
-    this.rules = [];
-    if (rules && rules.length !== 0) {
-      rules.forEach((rule) => {
-        this.rules.push(new Rule(rule));
-      });
-    }
   }
 
   addRule(rule) {

@@ -43,7 +43,12 @@ export const handleUpdateNotification = (notification) => {
 
   console.log("message from stream: ", notification);
   console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
+  // additional logs to see segments and rules updated in flag 1
   console.log("flag 1: ", JSON.parse(JSON.stringify(FlagCache["flag-1"])));
+  console.log(
+    "flag 1 rules: ",
+    JSON.parse(JSON.stringify(FlagCache["flag-1"].segments[0]))
+  );
 };
 
 export const addFlagsToCache = (data) => {
