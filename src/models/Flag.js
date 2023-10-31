@@ -15,15 +15,15 @@ export class Flag {
   }
 
   updateFlag({ isActive, updatedAt, segments }) {
-    if (isActive) {
+    if (isActive !== undefined) {
       this.isActive = isActive;
     }
 
-    if (updatedAt) {
+    if (updatedAt !== undefined) {
       this.updatedAt = updatedAt;
     }
 
-    if (segments) {
+    if (segments !== undefined) {
       this.segments = [];
       if (segments.length !== 0) {
         segments.forEach((segment) => {

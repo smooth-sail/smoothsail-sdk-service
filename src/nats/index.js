@@ -1,15 +1,15 @@
 import "dotenv/config";
 import { connect, StringCodec, consumerOpts, createInbox } from "nats";
-import { handleUpdateNotification } from "../utils/flags";
+import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
+import { Flag } from "../models/flag";
 
 const handleFlagUpdate = (err, msg) => {
   if (err) {
     console.error("Error:", err);
   } else {
     const message = JSON.parse(StringCodec().decode(msg.data));
-    console.log(message);
     // update the flag cache based on the message
     handleUpdateNotification(message);
     // send the latest flag cache to all clients via SSE
@@ -22,8 +22,9 @@ const handleFlagsReply = (err, msg) => {
   if (err) {
     console.error("Error:", err);
   } else {
-    console.log(JSON.parse(StringCodec().decode(msg.data)));
-    // Handle updating flag cache.
+    const data = JSON.parse(StringCodec().decode(msg.data));
+    addFlagsToCache(data);
+    console.log("Flags have been retrieved:", FlagCache);
     msg.ack();
   }
 };
@@ -45,7 +46,7 @@ class JetstreamManager {
 
   async connectToJetStream() {
     this.nc = await connect({ servers: process.env.NATS_SERVER });
-    this.js = this.nc.jetstream();
+    this.js = await this.nc.jetstream();
   }
 
   async subscribeToStream(stream, subject, callbackFn) {
@@ -73,7 +74,7 @@ class JetstreamManager {
     opts.deliverNew();
     opts.deliverTo(createInbox());
     opts.durable(subject);
-    opts.deliverTo(subject);
+    // opts.deliverTo(subject);
     opts.manualAck();
     callbackFn && opts.callback(callbackFn.bind(this));
 
@@ -83,10 +84,5 @@ class JetstreamManager {
 
 // Create an instance of the JetstreamManager class
 const jsm = new JetstreamManager();
-
-// // Call the `initialize` method to start the initialization process
-(async () => {
-  await jsm.init();
-})();
 
 export default jsm;
