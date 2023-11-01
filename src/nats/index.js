@@ -28,6 +28,17 @@ const handleFlagsReply = (err, msg) => {
   }
 };
 
+const handleKeyUpdate = (err, msg) => {
+  if (err) {
+    console.error("Error:", err);
+  } else {
+    const data = JSON.parse(StringCodec().decode(msg.data));
+    console.log("Message from manager:", data);
+    // Handle Key update
+    msg.ack();
+  }
+};
+
 class JetstreamManager {
   constructor() {
     this.sc = StringCodec();
@@ -41,6 +52,7 @@ class JetstreamManager {
       "GET_ALL_FLAGS",
       handleFlagsReply
     );
+    await this.subscribeToStream("SDK_KEY", "KEY_UPDATE", handleKeyUpdate);
   }
 
   async connectToJetStream() {
