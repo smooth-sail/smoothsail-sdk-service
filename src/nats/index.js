@@ -3,7 +3,6 @@ import { connect, StringCodec, consumerOpts, createInbox } from "nats";
 import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
-import { Flag } from "../models/Flag";
 
 const handleFlagUpdate = (err, msg) => {
   if (err) {
@@ -66,6 +65,18 @@ class JetstreamManager {
           "NATS Jetstream: Publish message has failed. Check your connection."
         );
       });
+  }
+
+  async validateSdkKey(key) {
+    const sdkKey = this.sc.encode(key);
+    const result = await this.nc
+      .request("SDK_KEY", sdkKey, { timeout: 1000 })
+      .catch((err) => {
+        console.log(`problem with request: ${err.message}`);
+      });
+
+    const data = result._rdata.toString();
+    return JSON.parse(data);
   }
 
   createConfig(subject, callbackFn) {
