@@ -27,6 +27,11 @@ app.use(express.json());
 (async () => {
   await jsm.init();
   await jsm.requestAllFlags();
+
+  // Logs { isValid: true }
+  // console.log(
+  //   await jsm.validateSdkKey(<INSERT CURRENT KEY>)
+  // );
 })();
 
 app.use("/api", apiRouter);
