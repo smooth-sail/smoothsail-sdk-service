@@ -14,6 +14,7 @@ import jsm from "../nats";
 export const sseNotifications = async (req, res) => {
   const sdkKey = req.query.key;
   // needs to be updated to check against stored key
+
   const allowAccess = await jsm.validateSdkKey(sdkKey);
   console.log("should this key be allowed access: ", allowAccess);
 
