@@ -5,11 +5,11 @@ import * as flagsController from "../controllers/flags.controller";
 
 const router = express.Router();
 
-// route for SDK to fetch flags - no longer needed
-// router.get("/flags", flagsController.getAllFlags);
-
 // SSE API routes
 router.get("/ff-updates-stream", flagsController.sseNotifications);
+
+// route for SDK to fetch flags - no longer needed
+// router.get("/flags", flagsController.getAllFlags);
 
 // test subscriber
 // router.post("/flagUpdates", (req, res) => {

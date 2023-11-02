@@ -36,6 +36,10 @@ const handleKeyUpdate = (err, msg) => {
     const data = JSON.parse(StringCodec().decode(msg.data));
     console.log("Message from manager:", data);
     // Handle Key update
+    // does the new key get sent? hashed and stored somewhere?
+
+    // message means new sdk key - close all SSE connections
+    clients.closeAllClients();
     msg.ack();
   }
 };
