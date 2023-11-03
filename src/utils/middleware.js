@@ -1,14 +1,11 @@
-import keyMemory from "../models/Key";
+import jsm from "../nats";
 
 export const authenticateSDK = async (req, res, next) => {
   const sdkKey = req.query.key;
-  let keyValid;
 
-  if (keyMemory.noKeyInMemory()) {
-    keyValid = await keyMemory.fetchKeyFromNatsAndCompare(sdkKey);
-  } else {
-    keyValid = await keyMemory.compareKeyAgainstKeyMemory(sdkKey);
-  }
+  const allowAccess = await jsm.validateSdkKey(sdkKey);
+  console.log("Allow Access results: ", allowAccess);
+  const keyValid = allowAccess["isValid"];
 
   if (keyValid) {
     next();
