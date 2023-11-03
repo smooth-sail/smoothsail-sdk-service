@@ -1,7 +1,9 @@
 import jsm from "../nats";
 
 export const authenticateSDK = async (req, res, next) => {
-  const sdkKey = req.query.key;
+  const sdkKey = req.headers.authorization;
+
+  console.log(req.body);
 
   const allowAccess = await jsm.validateSdkKey(sdkKey);
   console.log("Allow Access results: ", allowAccess);
