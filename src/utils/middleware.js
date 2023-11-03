@@ -1,10 +1,16 @@
-import jsm from "../nats";
+import keyMemory from "../models/Key";
 
 export const authenticateSDK = async (req, res, next) => {
   const sdkKey = req.query.key;
-  const allowAccess = await jsm.validateSdkKey(sdkKey);
-  console.log("(middleware) should this key be allowed access: ", allowAccess);
-  if (allowAccess["isValid"]) {
+  let keyValid;
+
+  if (keyMemory.noKeyInMemory()) {
+    keyValid = await keyMemory.compareKeyAgainstManager(sdkKey);
+  } else {
+    keyValid = await keyMemory.compareKeyAgainstKeyMemory(sdkKey);
+  }
+
+  if (keyValid) {
     next();
   } else {
     res.status(401).send({ error: "Invalid credentials" });

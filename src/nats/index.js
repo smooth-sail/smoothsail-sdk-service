@@ -3,6 +3,7 @@ import { connect, StringCodec, consumerOpts, createInbox } from "nats";
 import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
+import keyMemory from "../models/Key";
 
 const handleFlagUpdate = (err, msg) => {
   if (err) {
@@ -35,8 +36,8 @@ const handleKeyUpdate = (err, msg) => {
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
     console.log("Message from manager:", data);
-    // Handle Key update
-    // does the new key get sent? hashed and stored somewhere?
+    // Clear key from memory
+    keyMemory.clearKeyInMemory();
 
     // message means new sdk key - close all SSE connections
     clients.closeAllClients();

@@ -1,6 +1,5 @@
 import FlagCache from "../cache/flagCache";
 import clients from "../models/sse-clients";
-import jsm from "../nats";
 
 // fetch no longer needed
 // export const getAllFlags = async (req, res) => {
