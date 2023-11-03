@@ -20,6 +20,10 @@ export const sseNotifications = async (req, res) => {
     `data: ${JSON.stringify({ type: "flags", payload: FlagCache })}\n\n`
   );
 
+  setInterval(() => {
+    res.write(`data: ${JSON.stringify({ type: "heartbeat" })}\n\n`);
+  }, 10000);
+
   req.on("close", () => {
     console.log(`${clientId} Connection closed`);
     clients.closeClient(clientId);
