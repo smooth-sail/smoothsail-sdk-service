@@ -3,11 +3,13 @@ import express from "express";
 import cors from "cors";
 import apiRouter from "./routes/Api.routes";
 import jsm from "./nats";
+import { authenticateSDK } from "./utils/middleware";
 
 const app = express();
 
 app.use(cors()); // this should be later replaced with whitelisted domains
 app.use(express.json());
+app.use(authenticateSDK);
 
 // initial fetch of flag data when application spun up
 // const GET_ALL_FLAGS = "http://localhost:3000/api/sdk/flags";
