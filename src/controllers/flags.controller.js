@@ -1,15 +1,6 @@
 import FlagCache from "../cache/flagCache";
 import clients from "../models/sse-clients";
 
-// fetch no longer needed
-// export const getAllFlags = async (req, res) => {
-//   try {
-//     res.status(200).json({ payload: FlagCache });
-//   } catch (err) {
-//     res.status(500).json({ error: "Internal error occurred." });
-//   }
-// };
-
 export const sseNotifications = async (req, res) => {
   const headers = {
     "Content-Type": "text/event-stream",

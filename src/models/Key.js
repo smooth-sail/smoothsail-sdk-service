@@ -15,7 +15,7 @@ class Key {
   }
 
   async compareKeyAgainstKeyMemory(otherKey) {
-    console.log("compared to key from memory");
+    console.log("Compared to key from memory");
     const match = await bcrypt.compare(otherKey, this.key);
     return match;
   }
@@ -24,12 +24,12 @@ class Key {
     this.key = undefined;
   }
 
-  async compareKeyAgainstManager(key) {
+  async fetchKeyFromNatsAndCompare(key) {
+    console.log("Fetched key from manager");
     const allowAccess = await jsm.validateSdkKey(key);
-    console.log("fetched key from manager..");
-    console.log("allow access results: ", allowAccess);
+    console.log("Allow Access results: ", allowAccess);
+
     if (allowAccess["isValid"]) {
-      console.log("is this working...");
       this.storeKey(key);
       return true;
     }

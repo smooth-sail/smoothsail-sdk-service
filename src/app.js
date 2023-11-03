@@ -11,17 +11,6 @@ app.use(cors()); // this should be later replaced with whitelisted domains
 app.use(express.json());
 app.use(authenticateSDK);
 
-// initial fetch of flag data when application spun up
-// const GET_ALL_FLAGS = "http://localhost:3000/api/sdk/flags";
-
-// (async () => {
-//   const { data } = await axios.get(GET_ALL_FLAGS);
-//   for (let flag in data.payload) {
-//     FlagCache[flag] = new Flag(data.payload[flag]);
-//   }
-
-//   console.log("flag cache: ", FlagCache);
-// })();
 (async () => {
   await jsm.init();
   await jsm.requestAllFlags();

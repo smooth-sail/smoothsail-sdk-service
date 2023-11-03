@@ -36,7 +36,6 @@ const handleKeyUpdate = (err, msg) => {
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
     console.log("Message from manager:", data);
-    // Clear key from memory
     keyMemory.clearKeyInMemory();
 
     // message means new sdk key - close all SSE connections

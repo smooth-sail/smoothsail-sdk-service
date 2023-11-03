@@ -5,7 +5,7 @@ export const authenticateSDK = async (req, res, next) => {
   let keyValid;
 
   if (keyMemory.noKeyInMemory()) {
-    keyValid = await keyMemory.compareKeyAgainstManager(sdkKey);
+    keyValid = await keyMemory.fetchKeyFromNatsAndCompare(sdkKey);
   } else {
     keyValid = await keyMemory.compareKeyAgainstKeyMemory(sdkKey);
   }
