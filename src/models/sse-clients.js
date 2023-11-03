@@ -22,9 +22,7 @@ class Clients {
   }
   closeAllClients() {
     console.log("closing all the clients");
-    this.allClients.forEach((client) =>
-      client.res.write(`data: ${JSON.stringify({ type: "close" })}\n\n`)
-    );
+    this.allClients.forEach((client) => client.res.connection.end());
   }
 }
 
