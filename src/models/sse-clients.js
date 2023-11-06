@@ -20,6 +20,10 @@ class Clients {
       client.res.write(`data: ${JSON.stringify(notificationMsg)}\n\n`)
     );
   }
+  closeAllClients() {
+    console.log("closing all the clients");
+    this.allClients.forEach((client) => client.res.connection.end());
+  }
 }
 
 let clients = new Clients();

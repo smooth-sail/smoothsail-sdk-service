@@ -11,6 +11,7 @@ const handleFlagUpdate = (err, msg) => {
     const message = JSON.parse(StringCodec().decode(msg.data));
     // update the flag cache based on the message
     handleUpdateNotification(message);
+
     // send the latest flag cache to all clients via SSE
     clients.sendNotificationToAllClients({ type: "flags", payload: FlagCache });
     msg.ack();
@@ -34,7 +35,9 @@ const handleKeyUpdate = (err, msg) => {
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
     console.log("Message from manager:", data);
-    // Handle Key update
+
+    // message means new sdk key - close all SSE connections
+    clients.closeAllClients();
     msg.ack();
   }
 };
