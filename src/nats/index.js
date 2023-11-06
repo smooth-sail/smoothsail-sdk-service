@@ -1,10 +1,13 @@
 import "dotenv/config";
-import { connect, StringCodec, consumerOpts, createInbox } from "nats";
-import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
+import { connect, StringCodec, consumerOpts, createInbox, Events } from "nats";
+
 import clients from "../models/sse-clients";
 import FlagCache from "../cache/flagCache";
 
-const handleFlagUpdate = (err, msg) => {
+import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
+
+const handleFlagUpdate = async (err, msg) => {
+  console.log("update");
   if (err) {
     console.error("Error:", err);
   } else {
@@ -48,25 +51,52 @@ class JetstreamManager {
   }
 
   async init() {
-    await this.connectToJetStream();
-    await this.subscribeToStream("FLAG_DATA", "FLAG_UPDATE", handleFlagUpdate);
-    await this.subscribeToStream(
+    await this._connectToJetStream();
+    await this._subscribeToStream("FLAG_DATA", "FLAG_UPDATE", handleFlagUpdate);
+    await this._subscribeToStream(
       "FLAG_DATA",
       "GET_ALL_FLAGS",
       handleFlagsReply
     );
-    await this.subscribeToStream("SDK_KEY", "KEY_UPDATE", handleKeyUpdate);
+    await this._subscribeToStream("SDK_KEY", "KEY_UPDATE", handleKeyUpdate);
   }
 
-  async connectToJetStream() {
-    this.nc = await connect({ servers: process.env.NATS_SERVER });
+  async _connectToJetStream() {
+    this.nc = await connect({
+      servers: process.env.NATS_SERVER,
+      reconnect: true,
+      reconnectTimeWait: 3000,
+    });
     this.js = await this.nc.jetstream();
+    this.jsm = await this.nc.jetstreamManager();
+
+    this._logConnectionEvents();
   }
 
-  async subscribeToStream(stream, subject, callbackFn) {
+  async _logConnectionEvents() {
+    for await (const s of this.nc.status()) {
+      const date = new Date().toLocaleString();
+      switch (s.type) {
+        case Events.Disconnect:
+          console.log(
+            `${date}: NATS Jetstream client disconnected from nats://${s.data}`
+          );
+          break;
+        case Events.Reconnect:
+          await this.requestAllFlags();
+          console.log(
+            `${date}: NATS Jetstream client reconnected to nats://${s.data}`
+          );
+          break;
+        default:
+      }
+    }
+  }
+
+  async _subscribeToStream(stream, subject, callbackFn) {
     await this.js.subscribe(
       `${stream}.${subject}`,
-      this.createConfig(subject, callbackFn)
+      this._createConfig(subject, callbackFn)
     );
   }
 
@@ -74,33 +104,25 @@ class JetstreamManager {
     const encodedMessage = this.sc.encode("Request all flags");
     await this.js
       .publish("FLAG_DATA.REQUEST_ALL_FLAGS", encodedMessage)
-      .catch((err) => {
-        throw Error(
-          err,
-          "NATS Jetstream: Publish message has failed. Check your connection."
-        );
-      });
+      .catch((err) => console.error(err));
   }
 
   async validateSdkKey(key) {
     const sdkKey = this.sc.encode(key);
     const result = await this.nc
       .request("SDK_KEY", sdkKey, { timeout: 1000 })
-      .catch((err) => {
-        console.log(`problem with request: ${err.message}`);
-      });
+      .catch((err) => console.error(err));
 
     const data = result._rdata.toString();
     return JSON.parse(data);
   }
 
-  createConfig(subject, callbackFn) {
+  _createConfig(subject, callbackFn) {
     const opts = consumerOpts();
 
     opts.deliverNew();
     opts.deliverTo(createInbox());
     opts.durable(subject);
-    // opts.deliverTo(subject);
     opts.manualAck();
     callbackFn && opts.callback(callbackFn.bind(this));
 
@@ -108,7 +130,6 @@ class JetstreamManager {
   }
 }
 
-// Create an instance of the JetstreamManager class
 const jsm = new JetstreamManager();
 
 export default jsm;
