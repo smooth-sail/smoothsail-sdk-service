@@ -7,7 +7,6 @@ import FlagCache from "../cache/flagCache";
 import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 
 const handleFlagUpdate = async (err, msg) => {
-  console.log("update");
   if (err) {
     console.error("Error:", err);
   } else {
