@@ -6,7 +6,6 @@ export const authenticateSDK = async (req, res, next) => {
   console.log(req.body);
 
   const allowAccess = await jsm.validateSdkKey(sdkKey);
-  console.log("Allow Access results: ", allowAccess);
   const keyValid = allowAccess["isValid"];
 
   if (keyValid) {

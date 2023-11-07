@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { logger } from "../utils/logger";
 import { connect, StringCodec, consumerOpts, createInbox, Events } from "nats";
 
 import clients from "../models/sse-clients";
@@ -8,13 +9,10 @@ import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 
 const handleFlagUpdate = async (err, msg) => {
   if (err) {
-    console.error("Error:", err);
+    logger.error(err);
   } else {
     const message = JSON.parse(StringCodec().decode(msg.data));
-    // update the flag cache based on the message
     handleUpdateNotification(message);
-
-    // send the latest flag cache to all clients via SSE
     clients.sendNotificationToAllClients({ type: "flags", payload: FlagCache });
     msg.ack();
   }
@@ -22,21 +20,23 @@ const handleFlagUpdate = async (err, msg) => {
 
 const handleFlagsReply = (err, msg) => {
   if (err) {
-    console.error("Error:", err);
+    logger.error(err);
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
     addFlagsToCache(data);
-    console.log("Flags have been retrieved:", FlagCache);
+    logger.info("Feature flag data received from Manager.");
+    logger.debug(FlagCache);
     msg.ack();
   }
 };
 
 const handleKeyUpdate = (err, msg) => {
   if (err) {
-    console.error("Error:", err);
+    logger.error(err);
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
-    console.log("Message from manager:", data);
+    logger.warn("SDK Key has been regenerated. Closing all SSE connections.");
+    logger.debug(data);
 
     // message means new sdk key - close all SSE connections
     clients.closeAllClients();
@@ -77,13 +77,13 @@ class JetstreamManager {
       const date = new Date().toLocaleString();
       switch (s.type) {
         case Events.Disconnect:
-          console.log(
+          logger.error(
             `${date}: NATS Jetstream client disconnected from nats://${s.data}`
           );
           break;
         case Events.Reconnect:
           await this.requestAllFlags();
-          console.log(
+          logger.info(
             `${date}: NATS Jetstream client reconnected to nats://${s.data}`
           );
           break;
@@ -103,14 +103,14 @@ class JetstreamManager {
     const encodedMessage = this.sc.encode("Request all flags");
     await this.js
       .publish("FLAG_DATA.REQUEST_ALL_FLAGS", encodedMessage)
-      .catch((err) => console.error(err));
+      .catch((err) => logger.error(err));
   }
 
   async validateSdkKey(key) {
     const sdkKey = this.sc.encode(key);
     const result = await this.nc
       .request("SDK_KEY", sdkKey, { timeout: 1000 })
-      .catch((err) => console.error(err));
+      .catch((err) => logger.error(err));
 
     const data = result._rdata.toString();
     return JSON.parse(data);

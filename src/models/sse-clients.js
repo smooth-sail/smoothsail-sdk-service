@@ -1,3 +1,5 @@
+import { logger } from "../utils/logger";
+
 class Clients {
   constructor() {
     this.allClients = [];
@@ -21,7 +23,7 @@ class Clients {
     );
   }
   closeAllClients() {
-    console.log("closing all the clients");
+    logger.info("closing all the clients");
     this.allClients.forEach((client) => client.res.connection.end());
   }
 }
