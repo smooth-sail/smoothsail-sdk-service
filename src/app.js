@@ -2,13 +2,18 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import apiRouter from "./routes/Api.routes";
+import morgan from "morgan";
+import logger from "./utils/logger";
 import jsm from "./nats";
 import { authenticateSDK } from "./utils/middleware";
 
 const app = express();
 
+app.use(morgan("combined", { stream: logger.stream }));
+
 app.use(cors()); // this should be later replaced with whitelisted domains
 app.use(express.json());
+
 app.use(authenticateSDK);
 
 (async () => {
@@ -23,6 +28,6 @@ app.use("/", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+app.listen(PORT, () => logger.info(`SDK Service listening on port ${PORT}!`));
 
 export default app;

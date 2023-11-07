@@ -1,5 +1,6 @@
 import FlagCache from "../cache/flagCache";
 import { Flag } from "../models/Flag";
+import logger from "../utils/logger";
 
 export const handleUpdateNotification = (notification) => {
   let flag = FlagCache[notification.payload["fKey"]];
@@ -41,14 +42,8 @@ export const handleUpdateNotification = (notification) => {
       break;
   }
 
-  console.log("message from stream: ", notification);
-  console.log("flag cache: ", JSON.parse(JSON.stringify(FlagCache)));
-  // additional logs to see segments and rules updated in flag 1
-  console.log("flag 1: ", JSON.parse(JSON.stringify(FlagCache["flag-1"])));
-  console.log(
-    "flag 1 rules: ",
-    JSON.parse(JSON.stringify(FlagCache["flag-1"].segments[0]))
-  );
+  logger.info(`Message from Jetstream: ${JSON.stringify(notification)}`);
+  console.log("flag cache:", FlagCache);
 };
 
 export const addFlagsToCache = (data) => {

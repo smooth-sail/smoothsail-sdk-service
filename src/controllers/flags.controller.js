@@ -1,5 +1,6 @@
 import FlagCache from "../cache/flagCache";
 import clients from "../models/sse-clients";
+import logger from "../utils/logger";
 
 export const sseNotifications = async (req, res) => {
   const headers = {
@@ -12,7 +13,7 @@ export const sseNotifications = async (req, res) => {
   const clientId = clients.addNewClient(res);
 
   const connectMsg = `SSE connection established with client id: ${clientId}`;
-  console.log(connectMsg);
+  logger.info(connectMsg);
 
   let data = `data: ${JSON.stringify({ msg: connectMsg })}\n\n`;
   res.write(data);
@@ -25,7 +26,7 @@ export const sseNotifications = async (req, res) => {
   }, 10000);
 
   req.on("close", () => {
-    console.log(`${clientId} Connection closed`);
+    logger.info(`${clientId} Connection closed`);
     clients.closeClient(clientId);
   });
 };
