@@ -26,6 +26,7 @@ const handleFlagsReply = (err, msg) => {
     addFlagsToCache(data);
     logger.info("Feature flag data received from Manager.");
     logger.debug(FlagCache);
+
     msg.ack();
   }
 };
@@ -38,7 +39,6 @@ const handleKeyUpdate = (err, msg) => {
     logger.warn("SDK Key has been regenerated. Closing all SSE connections.");
     logger.debug(data);
 
-    // message means new sdk key - close all SSE connections
     clients.closeAllClients();
     msg.ack();
   }
@@ -63,7 +63,6 @@ class JetstreamManager {
   async _connectToJetStream() {
     this.nc = await connect({
       servers: process.env.NATS_SERVER,
-      reconnect: true,
       reconnectTimeWait: 3000,
     });
     this.js = await this.nc.jetstream();
@@ -74,18 +73,15 @@ class JetstreamManager {
 
   async _logConnectionEvents() {
     for await (const s of this.nc.status()) {
-      const date = new Date().toLocaleString();
       switch (s.type) {
         case Events.Disconnect:
           logger.error(
-            `${date}: NATS Jetstream client disconnected from nats://${s.data}`
+            `NATS Jetstream client disconnected from nats://${s.data}`
           );
           break;
         case Events.Reconnect:
           await this.requestAllFlags();
-          logger.info(
-            `${date}: NATS Jetstream client reconnected to nats://${s.data}`
-          );
+          logger.info(`NATS Jetstream client reconnected to nats://${s.data}`);
           break;
         default:
       }

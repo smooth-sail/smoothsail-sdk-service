@@ -4,10 +4,11 @@ import cors from "cors";
 import apiRouter from "./routes/Api.routes";
 import { morganMiddleware, logger } from "./utils/logger";
 import jsm from "./nats";
-import { authenticateSDK } from "./utils/middleware";
+import { authenticateSDK, rateLimiter } from "./utils/middleware";
 
 const app = express();
 
+app.use(rateLimiter);
 app.use(morganMiddleware);
 
 app.use(cors());
