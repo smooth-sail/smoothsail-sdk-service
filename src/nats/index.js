@@ -1,5 +1,5 @@
 import "dotenv/config";
-import logger from "../utils/logger";
+import { logger } from "../utils/logger";
 import { connect, StringCodec, consumerOpts, createInbox, Events } from "nats";
 
 import clients from "../models/sse-clients";
@@ -9,13 +9,10 @@ import { handleUpdateNotification, addFlagsToCache } from "../utils/flags";
 
 const handleFlagUpdate = async (err, msg) => {
   if (err) {
-    logger.error("Error:", err);
+    logger.error(err);
   } else {
     const message = JSON.parse(StringCodec().decode(msg.data));
-    // update the flag cache based on the message
     handleUpdateNotification(message);
-
-    // send the latest flag cache to all clients via SSE
     clients.sendNotificationToAllClients({ type: "flags", payload: FlagCache });
     msg.ack();
   }
@@ -23,23 +20,23 @@ const handleFlagUpdate = async (err, msg) => {
 
 const handleFlagsReply = (err, msg) => {
   if (err) {
-    logger.error("Error:", err);
+    logger.error(err);
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
     addFlagsToCache(data);
-    logger.info("Feature flag data received from Manager:");
-    console.log(FlagCache);
+    logger.info("Feature flag data received from Manager.");
+    logger.debug(FlagCache);
     msg.ack();
   }
 };
 
 const handleKeyUpdate = (err, msg) => {
   if (err) {
-    logger.error("Error:", err);
+    logger.error(err);
   } else {
     const data = JSON.parse(StringCodec().decode(msg.data));
-    logger.info("Message from Manager:");
-    console.log(data);
+    logger.warn("SDK Key has been regenerated. Closing all SSE connections.");
+    logger.debug(data);
 
     // message means new sdk key - close all SSE connections
     clients.closeAllClients();

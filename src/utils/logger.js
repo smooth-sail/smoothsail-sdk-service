@@ -1,43 +1,67 @@
 import "dotenv/config";
 import appRoot from "app-root-path";
-import { createLogger, format, transports } from "winston";
-const { combine, colorize, timestamp, label, printf } = format;
+import winston from "winston";
+import morgan from "morgan";
+
+const { combine, colorize, timestamp, errors, printf, json } = winston.format;
+
+const errorFilter = winston.format((info, opts) => {
+  return info.level === "error" ? info : false;
+});
+
+const prettyPrintIfObject = winston.format((info, opts) => {
+  if (typeof info.message === "object") {
+    info.message = JSON.stringify(info.message, null, 2);
+  }
+  return info;
+});
 
 const options = {
-  file: {
-    level: process.env.LOGLEVEL || "warn",
-    filename: `${appRoot}/logs/app.log`,
+  combined: {
+    filename: `${appRoot}/logs/combined.log`,
     handleExceptions: true,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
-    format: format.combine(format.timestamp(), format.json()),
+  },
+  exception: {
+    filename: `${appRoot}/logs/exception.log`,
+  },
+  error: {
+    level: "error",
+    filename: `${appRoot}/logs/error.log`,
+    format: combine(
+      errorFilter(),
+      errors({ stack: true }),
+      timestamp(),
+      json()
+    ),
   },
   console: {
+    level: process.env.LOGLEVEL || "warn",
     format: combine(
       colorize(),
-      timestamp(),
-      label({ label: "SDK Service" }),
-      printf(
-        (params) =>
-          `${new Date().toTimeString()} - ${params.level}: ${params.message}`
-      )
+      timestamp({
+        format: "YYYY-MM-DD hh:mm:ss A",
+      }),
+      prettyPrintIfObject(),
+      printf((info) => `[${info.level}] ${info.timestamp}: ${info.message}`)
     ),
-    level: process.env.LOGLEVEL || "warn",
-    defaultMeta: { service: "user-service" },
     handleExceptions: true,
-  },
-};
-const logger = createLogger({
-  transports: [
-    new transports.File(options.file),
-    new transports.Console(options.console),
-  ],
-  exitOnError: false,
-});
-logger.stream = {
-  write: function (message, encoding) {
-    logger.info(message);
   },
 };
 
-export default logger;
+export const logger = winston.createLogger({
+  transports: [
+    new winston.transports.File(options.combined),
+    new winston.transports.File(options.error),
+    new winston.transports.Console(options.console),
+  ],
+  exceptionHandlers: [new winston.transports.File(options.exception)],
+});
+
+export const morganMiddleware = morgan(
+  ":method :url :status - :response-time ms",
+  {
+    stream: {
+      write: (message) => logger.http(message.trim()),
+    },
+  }
+);

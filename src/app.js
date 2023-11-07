@@ -2,16 +2,15 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import apiRouter from "./routes/Api.routes";
-import morgan from "morgan";
-import logger from "./utils/logger";
+import { morganMiddleware, logger } from "./utils/logger";
 import jsm from "./nats";
 import { authenticateSDK } from "./utils/middleware";
 
 const app = express();
 
-app.use(morgan("combined", { stream: logger.stream }));
+app.use(morganMiddleware);
 
-app.use(cors()); // this should be later replaced with whitelisted domains
+app.use(cors());
 app.use(express.json());
 
 app.use(authenticateSDK);
@@ -24,7 +23,7 @@ app.use(authenticateSDK);
 app.use("/api", apiRouter);
 
 app.use("/", (req, res) => {
-  res.status(404).json({ error: "no such route" });
+  res.status(404).json({ error: "No such route" });
 });
 
 const PORT = process.env.PORT || 3001;

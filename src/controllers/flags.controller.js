@@ -1,6 +1,6 @@
 import FlagCache from "../cache/flagCache";
 import clients from "../models/sse-clients";
-import logger from "../utils/logger";
+import { logger } from "../utils/logger";
 
 export const sseNotifications = async (req, res) => {
   const headers = {
@@ -26,7 +26,7 @@ export const sseNotifications = async (req, res) => {
   }, 10000);
 
   req.on("close", () => {
-    logger.info(`${clientId} Connection closed`);
+    logger.info(`Client id ${clientId}: Connection closed`);
     clients.closeClient(clientId);
   });
 };
