@@ -1,12 +1,11 @@
 import { Segment } from "./Segment";
 
 export class Flag {
-  constructor({ fKey, isActive, createdAt, updatedAt, segments }) {
+  constructor({ fKey, isActive, segments }) {
     this.fKey = fKey;
     this.isActive = isActive;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
     this.segments = [];
+
     if (segments && segments.length !== 0) {
       segments.forEach((segment) => {
         this.segments.push(new Segment(segment));
@@ -14,13 +13,9 @@ export class Flag {
     }
   }
 
-  updateFlag({ isActive, updatedAt, segments }) {
+  updateFlag({ isActive, segments }) {
     if (isActive !== undefined) {
       this.isActive = isActive;
-    }
-
-    if (updatedAt !== undefined) {
-      this.updatedAt = updatedAt;
     }
 
     if (segments !== undefined) {
