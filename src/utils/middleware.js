@@ -4,8 +4,6 @@ import { rateLimit } from "express-rate-limit";
 export const authenticateSDK = async (req, res, next) => {
   const sdkKey = req.headers.authorization;
 
-  console.log(req.body);
-
   const allowAccess = await jsm.validateSdkKey(sdkKey);
   const keyValid = allowAccess["isValid"];
 
