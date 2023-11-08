@@ -48,6 +48,7 @@ export class Flag {
   }
 
   addRule(newRule) {
+    console.log(newRule);
     this.segments.forEach((segment) => {
       if (segment.sKey === newRule["sKey"]) {
         segment.addRule(newRule);
