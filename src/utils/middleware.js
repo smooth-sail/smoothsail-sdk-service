@@ -18,11 +18,11 @@ export const authenticateSDK = async (req, res, next) => {
 // Limit each IP to 100 requests per `window` by default
 // or use the rate limit in environmental variable
 
-let rateLimit = process.env.RATE_LIMIT || 10;
+let limit = process.env.RATE_LIMIT || 10;
 
 export const rateLimiter = rateLimit({
   windowMs: 60 * 1000, // 15 minutes
-  limit: rateLimit,
+  limit: limit,
   standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false,
 });
