@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "babel-node src/app.js",
     "test": "jest --detectOpenHandles",
     "dev": "nodemon --exec babel-node src/app.js"
   },
