@@ -91,7 +91,7 @@ class JetstreamManager {
   async _subscribeToStream(stream, subject, callbackFn) {
     await this.js.subscribe(
       `${stream}.${subject}`,
-      this._createConfig(subject, callbackFn)
+      this._createConfig(callbackFn)
     );
   }
 
@@ -112,12 +112,11 @@ class JetstreamManager {
     return JSON.parse(data);
   }
 
-  _createConfig(subject, callbackFn) {
+  _createConfig(callbackFn) {
     const opts = consumerOpts();
 
     opts.deliverNew();
     opts.deliverTo(createInbox());
-    opts.durable(subject);
     opts.manualAck();
     callbackFn && opts.callback(callbackFn.bind(this));
 
