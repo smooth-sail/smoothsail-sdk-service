@@ -1,4 +1,4 @@
-**Getting Started**
+## Getting Started
 
 Set up the following environmental variables in a  `.env`  file:
 ```
@@ -12,7 +12,7 @@ NATS_SERVER="nats://localhost:<portnumber>"
 
 The SDK Service is a proxy service that runs between the Manager Platform and the SmoothSail SDK embedded in your application. To ensure that your application runs properly, it is crucial that you run your applications in the correct order. First, start the Manager Platform and SDK Service. Then, you are ready to start using the SmoothSail SDK in your application.
 
-**Server Sent Events (SSE) Endpoint**
+### Server Sent Events (SSE) Endpoint
  *GET /api/ff-updates-stream*
 -   This SSE endpoint is used for the delivery of the feature flag ruleset upon initial connection and real time updates to flag data.
 -   To access this stream, the proper SDK key must be provided as an Authorization header when making a request to connect.
